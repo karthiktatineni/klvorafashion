@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -15,7 +16,10 @@ import {
     ExternalLink,
     ChevronRight,
     Search,
-    LayoutDashboard
+    LayoutDashboard,
+    LogOut,
+    MapPin,
+    Calendar
 } from "lucide-react";
 
 interface OrderItem {
@@ -42,32 +46,71 @@ const Admin = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsAuthenticated(true);
+            } else {
+                setIsAuthenticated(false);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
         if (!isAuthenticated) return;
 
-        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const ordersData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Order[];
-            setOrders(ordersData);
-            setLoading(false);
-        });
+        const fetchOrders = async () => {
+            try {
+                const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
 
-        return () => unsubscribe();
+                // Set up the listener
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const data = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    })) as Order[];
+                    console.log("Admin: Snapshot update received", data.length, "orders");
+                    setOrders(data);
+                    setLoading(false);
+                }, (error) => {
+                    console.error("Admin: Snapshot error:", error);
+                    toast.error("Failed to sync orders");
+                });
+
+                return unsubscribe;
+            } catch (error) {
+                console.error("Admin: Fetch error:", error);
+                setLoading(false);
+            }
+        };
+
+        const promise = fetchOrders();
+        return () => {
+            promise.then(unsubscribe => unsubscribe && unsubscribe());
+        };
     }, [isAuthenticated]);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === "admin123") { // Simple password for now, can be env var later
-            setIsAuthenticated(true);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
             toast.success("Welcome back, Admin");
-        } else {
-            toast.error("Invalid credentials");
+        } catch (error: any) {
+            toast.error(error.message || "Invalid credentials");
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            toast.success("Logged out successfully");
+        } catch (error) {
+            toast.error("Logout failed");
         }
     };
 
@@ -98,9 +141,9 @@ const Admin = () => {
     };
 
     const filteredOrders = orders.filter(order =>
-        order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.phone.includes(searchTerm) ||
-        order.id.includes(searchTerm)
+        (order?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order?.phone || "").includes(searchTerm) ||
+        (order?.id || "").includes(searchTerm)
     );
 
     if (!isAuthenticated) {
@@ -116,11 +159,20 @@ const Admin = () => {
                     </div>
                     <form onSubmit={handleLogin} className="space-y-4">
                         <input
+                            type="email"
+                            placeholder="Admin Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full bg-black border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-body"
+                            required
+                        />
+                        <input
                             type="password"
                             placeholder="Admin Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-black border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                            className="w-full bg-black border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-body"
+                            required
                         />
                         <Button variant="champagne" className="w-full h-12" type="submit">
                             Access Dashboard
@@ -151,8 +203,8 @@ const Admin = () => {
                                 className="bg-zinc-900 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-64"
                             />
                         </div>
-                        <Button variant="outline" size="icon" onClick={() => setIsAuthenticated(false)}>
-                            <ExternalLink className="w-4 h-4" />
+                        <Button variant="outline" size="icon" onClick={handleLogout} title="Logout">
+                            <LogOut className="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
@@ -199,6 +251,10 @@ const Admin = () => {
                                             <p className="font-semibold text-white">{order.name}</p>
                                             <p className="text-xs text-zinc-500 mt-1">{order.phone}</p>
                                             <p className="text-xs text-zinc-400 mt-0.5">{order.email}</p>
+                                            <div className="flex items-start gap-1 mt-2 text-zinc-500">
+                                                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                                <p className="text-[10px] leading-tight">{order.address}</p>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-6">
                                             <div className="space-y-1">
@@ -208,16 +264,22 @@ const Admin = () => {
                                                     </p>
                                                 ))}
                                             </div>
-                                            <p className="text-[10px] text-zinc-600 mt-2 uppercase tracking-tighter">ID: {order.id}</p>
+                                            <div className="flex items-center gap-2 mt-3">
+                                                <div className="flex items-center gap-1 text-[10px] text-zinc-600 bg-zinc-800/50 px-2 py-0.5 rounded">
+                                                    <Calendar className="w-3 h-3" />
+                                                    {order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : 'N/A'}
+                                                </div>
+                                                <p className="text-[10px] text-zinc-600 uppercase tracking-tighter">ID: {order.id}</p>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-6 font-display text-lg">
                                             ${order.total}
                                         </td>
                                         <td className="px-6 py-6">
                                             <span className={`px-3 py-1 rounded-full text-[10px] tracking-widest uppercase font-bold ${order.status === "pending" ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-                                                    order.status === "confirmed" ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" :
-                                                        order.status === "delivered" ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" :
-                                                            "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"
+                                                order.status === "confirmed" ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" :
+                                                    order.status === "delivered" ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" :
+                                                        "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"
                                                 }`}>
                                                 {order.status}
                                             </span>
