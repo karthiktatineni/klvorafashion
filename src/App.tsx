@@ -11,6 +11,7 @@ import NewArrivalsPage from "./pages/NewArrivalsPage";
 import ContactPage from "./pages/ContactPage";
 import ProductPage from "./pages/ProductPage";
 import Checkout from "./components/Checkout";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,8 @@ const App = () => (
             <Route path="/new-arrivals" element={<NewArrivalsPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/checkout" element={<Checkout />} /> {/* ← Add this */}
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
 
