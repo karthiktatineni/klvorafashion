@@ -4,9 +4,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { products, collections } from "@/data/products";
-import collectionMens from "@/assets/collection-mens.jpg";
-import collectionWomens from "@/assets/collection-womens.jpg";
-import collectionKids from "@/assets/collection-kids.jpg";
+import collectionMens from "@/assets/collection-1.jpg";
+import collectionWomens from "@/assets/collection-2.jpg";
+import collectionKids from "@/assets/collection-3.jpg";
 import { ArrowUpRight, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -125,7 +125,7 @@ const CollectionsPage = () => {
   return (
     <main className="bg-background min-h-screen">
       <Navbar />
-      
+
       {/* Hero */}
       <section className="pt-32 pb-16 lg:pt-40 lg:pb-24">
         <div className="container mx-auto px-6 lg:px-12">
@@ -152,9 +152,8 @@ const CollectionsPage = () => {
                 <button
                   key={collection.id}
                   onClick={() => handleGenderClick(collection.id)}
-                  className={`group relative aspect-[4/5] overflow-hidden text-left transition-all duration-300 ${
-                    genderFilter === collection.id ? "ring-2 ring-primary" : ""
-                  }`}
+                  className={`group relative aspect-[4/5] overflow-hidden text-left transition-all duration-300 ${genderFilter === collection.id ? "ring-2 ring-primary" : ""
+                    }`}
                 >
                   <img
                     src={collectionImages[collection.id] || collectionMens}
@@ -200,7 +199,7 @@ const CollectionsPage = () => {
                   All Products
                 </h2>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
@@ -211,7 +210,7 @@ const CollectionsPage = () => {
                   <SlidersHorizontal className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
-                
+
                 <span className="text-sm text-muted-foreground">
                   {filteredAndSortedProducts.length} products
                 </span>

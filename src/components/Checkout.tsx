@@ -4,6 +4,9 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
 interface OrderForm {
   name: string;
   email: string;
@@ -43,18 +46,16 @@ const Checkout = () => {
         size: item.size,
         color: item.color,
       })),
+      status: "pending",
+      createdAt: serverTimestamp(),
     };
 
     try {
-      await fetch("/.netlify/functions/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
+      await addDoc(collection(db, "orders"), orderData);
       toast.success("Order placed! Currently we only accept COD.");
       navigate("/"); // redirect to home or orders page
     } catch (err) {
-      console.error(err);
+      console.error("Error adding document: ", err);
       toast.error("Failed to place order. Try again!");
     }
   };

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import collectionMens from "@/assets/collection-mens.jpg";
-import collectionWomens from "@/assets/collection-womens.jpg";
-import collectionKids from "@/assets/collection-kids.jpg";
+import collectionMens from "@/assets/collection-1.jpg";
+import collectionWomens from "@/assets/collection-2.jpg";
+import collectionKids from "@/assets/collection-3.jpg";
 import { ArrowUpRight } from "lucide-react";
 
 const collections = [
@@ -43,14 +43,14 @@ const Collections = () => {
             </h2>
           </div>
           <p className="font-body text-muted-foreground max-w-md mt-6 lg:mt-0 leading-relaxed">
-            Each collection tells a unique story, crafted with meticulous attention 
+            Each collection tells a unique story, crafted with meticulous attention
             to detail and an unwavering commitment to quality.
           </p>
         </div>
 
         {/* Collections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-        {collections.map((collection, index) => (
+          {collections.map((collection, index) => (
             <Link
               to="/collections"
               key={collection.id}

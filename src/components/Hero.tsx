@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import carousel1 from "@/assets/carousel-1.jpg";
-import carousel2 from "@/assets/carousel-2.jpg";
-import carousel3 from "@/assets/carousel-3.jpg";
-import carousel4 from "@/assets/carousel-4.jpg";
-import carousel5 from "@/assets/carousel-5.jpg";
-import carousel6 from "@/assets/carousel-6.jpg";
+import carousel1 from "@/assets/hero-fashion.jpg";
+import carousel2 from "@/assets/collection-1.jpg";
+import carousel3 from "@/assets/collection-2.jpg";
+import carousel4 from "@/assets/collection-3.jpg";
+import carousel5 from "@/assets/product-1.jpg";
+import carousel6 from "@/assets/product-2.jpg";
 
 const carouselImages = [
   { src: carousel1, alt: "Men's streetwear fashion" },
@@ -36,9 +36,8 @@ const Hero = () => {
         {carouselImages.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
           >
             <img
               src={image.src}
@@ -69,7 +68,7 @@ const Hero = () => {
           {/* Subtitle */}
           <div className="overflow-hidden mb-12">
             <p className="font-body text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed opacity-0 animate-fade-up stagger-3">
-              Discover our curated collection of contemporary luxury and street fashion for 
+              Discover our curated collection of contemporary luxury and street fashion for
               men, women, and kids. Impeccable style meets timeless design.
             </p>
           </div>
@@ -97,11 +96,10 @@ const Hero = () => {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentSlide 
-                ? "w-8 bg-primary" 
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide
+                ? "w-8 bg-primary"
                 : "bg-foreground/30 hover:bg-foreground/50"
-            }`}
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
