@@ -131,21 +131,19 @@ const ProductPage = () => {
                       <button
                         key={color.name}
                         onClick={() => setSelectedColor(color.name)}
-                        className={`w-10 h-10 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
-                          selectedColor === color.name
-                            ? "border-primary"
-                            : "border-transparent"
-                        }`}
+                        className={`w-10 h-10 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${selectedColor === color.name
+                            ? "border-primary scale-110"
+                            : "border-white/20 hover:border-white/40"
+                          }`}
                         style={{ backgroundColor: color.hex }}
                         title={color.name}
                       >
                         {selectedColor === color.name && (
                           <Check
-                            className={`w-4 h-4 ${
-                              color.hex === "#ffffff" || color.hex === "#b3d4fc"
-                                ? "text-foreground"
-                                : "text-foreground"
-                            }`}
+                            className={`w-4 h-4 ${color.hex.toLowerCase() === "#ffffff" || color.hex.toLowerCase() === "#f5f5f5"
+                                ? "text-black"
+                                : "text-white"
+                              }`}
                           />
                         )}
                       </button>
@@ -164,11 +162,10 @@ const ProductPage = () => {
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`min-w-[3rem] h-12 px-4 border font-body text-sm tracking-wide transition-all duration-300 ${
-                        selectedSize === size
+                      className={`min-w-[3rem] h-12 px-4 border font-body text-sm tracking-wide transition-all duration-300 ${selectedSize === size
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border text-foreground hover:border-foreground"
-                      }`}
+                        }`}
                     >
                       {size}
                     </button>
